@@ -16,6 +16,11 @@ class CLITests(unittest.TestCase):
             q=subprocess.run([sys.executable,'-m','diffuselab','sample',out,'--count','4'],capture_output=True,text=True)
             self.assertEqual(q.returncode,0,q.stderr)
             self.assertEqual(len(json.loads(q.stdout)['points']),4)
+            q=subprocess.run([sys.executable,'-m','diffuselab','ddim',out,'--count','4','--steps','2'],capture_output=True,text=True)
+            self.assertEqual(q.returncode,0,q.stderr)
+            audit=json.loads(q.stdout)
+            self.assertEqual(audit['denoiser_calls'],8)
+            self.assertEqual(audit['timesteps'],[64,1])
 
     def test_invalid_artifact_clean_error(self):
         with tempfile.NamedTemporaryFile(mode='w',suffix='.json') as f:
