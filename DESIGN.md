@@ -34,3 +34,20 @@ The training and fresh reference generators share eight equally weighted known c
 For output P and reference R, symmetric NN squared distance is half of mean_{p in P} min_{r in R} ||p-r||^2 plus mean_{r in R} min_{p in P} ||r-p||^2. Units are coordinate squared. Mode coverage requires at least 5 generated samples within radius 0.4 of a center. Nearest-center bins count every output, including far-away samples, so the separate nearby coverage is needed. Neither metric proves balanced frequencies, calibrated density or absence of memorization.
 
 The SVG shares [-3,3] x/y axes for all four panels and reports outside-plot counts rather than silently dropping control failures. JSON keeps every sample. Floating-point reductions can vary slightly across Python/runtime versions; no cross-platform byte-identical model guarantee is made.
+
+
+## DDIM selected-grid sampling
+
+`sampling.py` uses the same artifact/network. For current t and selected previous s<t, with s=0 denoting clean output:
+
+```
+sigma^2 = eta^2 * (1-alpha_bar_s)/(1-alpha_bar_t) * (1-alpha_bar_t/alpha_bar_s)
+x0_hat = (x_t - sqrt(1-alpha_bar_t)*epsilon_hat)/sqrt(alpha_bar_t)
+x_s = sqrt(alpha_bar_s)*x0_hat + sqrt(1-alpha_bar_s-sigma^2)*epsilon_hat + sigma*z
+```
+
+The paper's alpha equals this code's alpha_bar. Eta is restricted to [0,1]; tiny negative variance radicands within 1e-12 can be rounded to zero, while larger negative values fail. This range is an implementation boundary, not a full characterization of valid eta values. No clean-point clipping is applied.
+
+For S>=2 steps, ascending grid points are `1+floor(i*(T-1)/(S-1))`, i=0..S-1, then reversed. S=1 jumps from T to clean output. S must be an integer 1..T; all returned timesteps are unique and descending. The previous point is the next selected timestep, not t-1 unless the full schedule is used. The last selected timestep jumps to 0. Returned JSON includes the full grid, eta, total actual predictor calls, calls per sample and call reduction versus T-step DDPM. No sampler setting is stored in v1 inference artifacts.
+
+Eta=0 consumes Gaussian draws only for the initial latent. Eta>0 consumes per-step draws only when previous>0. Full-grid eta=1 therefore consumes the same draws in the same order as the original sampler, and the algebra agrees within floating-point error. This equivalence test is about the sampler equations, not quality. Other grids or eta values do not preserve DDPM paths or output distributions. The oracle-epsilon skip test checks a known clean point/noise pair, not learned epsilon accuracy.
