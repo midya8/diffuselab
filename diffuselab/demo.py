@@ -38,7 +38,7 @@ def noise_mse(net, schedule, points, seed):
     return total/len(points)
 
 
-def demo():
+def demo(include_samplers=False):
     schedule = Schedule()
     training, reference = fixture(1024, 31), fixture(256, 37)
     net, history = train(training, schedule)
@@ -61,4 +61,11 @@ def demo():
                         'untrained':raw_samples,'gaussian_prior':prior}}
     assert result['noise_mse']['trained'] < result['noise_mse']['untrained']
     assert result['metrics']['trained']['within_0_4_of_center'] > result['metrics']['gaussian_prior']['within_0_4_of_center']
+    if include_samplers:
+        from .sampling import sample_ddim
+        arms = {}
+        for steps in [8,16,64]:
+            audit = sample_ddim(net,schedule,steps=steps)
+            arms[f'ddim_{steps}'] = {**audit,'metrics':metrics(audit['points'],reference)}
+        result['samplers'] = arms
     return result
