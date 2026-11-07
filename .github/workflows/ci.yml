@@ -19,5 +19,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m diffuselab demo > /tmp/diffuse-demo.json
+      - run: python -m diffuselab sampler-demo > /tmp/diffuse-demo.json
       - run: python examples/render_demo.py /tmp/diffuse-demo.json --check
+      - run: python examples/render_samplers.py /tmp/diffuse-demo.json --check
