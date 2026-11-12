@@ -1,4 +1,6 @@
-# Contracts and numerical choices
+# DiffuseLab numerical choices
+
+DiffuseLab learns a noise predictor for supplied two-dimensional points. The DDPM and DDIM samplers share that predictor and saved model. This note defines the equations, input bounds and synthetic comparison; the fixture results do not establish performance on other data.
 
 ## Diffusion arithmetic
 
