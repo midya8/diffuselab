@@ -1,6 +1,8 @@
 # DiffuseLab
 
-**Train a diffusion model without hiding the reverse process.** A dependency-free 2-D DDPM with a learned noise predictor, explicit Gaussian arithmetic, handwritten backpropagation and tests that catch mode-collapse-friendly metrics.
+DiffuseLab trains a small diffusion model on two-dimensional points. It implements the noise predictor, backpropagation and Gaussian reverse steps without runtime dependencies. The demo compares learned samples with untrained and Gaussian-prior controls, including a metric check that catches a deliberately collapsed generator.
+
+Train and sample with DDPM, or reuse the same model with selected-grid DDIM sampling. [DESIGN.md](DESIGN.md) defines both samplers, the training data and the saved-model format.
 
 ![Samples and controls on the same axes](assets/diffusion-audit.svg)
 
@@ -59,9 +61,9 @@ The learned model reaches all eight neighborhoods but is imperfect: 39.45% of sa
 
 The larger near-center fraction does **not** establish better sample quality: all DDIM arms have worse symmetric reference distance on this fixture. Every setting is shown, not just a selected winner. The 8/16/64 grids and eta=0 were fixed for this comparison, with no setting or seed search. Call savings count actual scalar predictor invocations (256 times the listed calls), not measured runtime, FLOPs, memory or quality equivalence. Both DDPM and DDIM start from the same Gaussian latents; DDPM then adds step noise while eta=0 does not.
 
-## Audit, not hype
+## Tests and limits
 
-33 tests include all-parameter central finite differences, independent posterior-mean algebra, schedule indexing, final-step determinism, serialization, bounds, CLI a mode-collapse counterexample, DDPM/DDIM equivalence, skipped-step formulas and counted predictor invocations. CI runs on Python 3.10-3.13 and regenerates the figure from the actual demo on 3.11.
+33 tests include all-parameter central finite differences, independent posterior-mean algebra, schedule indexing, final-step determinism, serialization, bounds, CLI, a mode-collapse counterexample, DDPM/DDIM equivalence, skipped-step formulas and counted predictor invocations. CI runs on Python 3.10-3.13 and regenerates the figure from the actual demo on 3.11.
 
 This is an educational low-dimensional generator. It is not an image model, latent diffusion system, density estimator, FID evaluation, security tool or production library. Nearest-neighbor metrics depend on sample size and are not likelihoods or distributional guarantees. This demo does not isolate causal contributions of architecture, schedule or optimizer. The terminal alpha-bar is about 0.006123, not zero: starting from a standard normal is an approximation to the finite forward marginal. No privacy guarantee, robust generalization claim or real-data evaluation is made.
 
