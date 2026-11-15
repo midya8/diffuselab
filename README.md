@@ -63,9 +63,17 @@ The larger near-center fraction does **not** establish better sample quality: al
 
 ## Tests and limits
 
-33 tests include all-parameter central finite differences, independent posterior-mean algebra, schedule indexing, final-step determinism, serialization, bounds, CLI, a mode-collapse counterexample, DDPM/DDIM equivalence, skipped-step formulas and counted predictor invocations. CI runs on Python 3.10-3.13 and regenerates the figure from the actual demo on 3.11.
+38 tests include all-parameter central finite differences, independent posterior-mean algebra, schedule indexing, final-step determinism, serialization, bounds, CLI, a mode-collapse counterexample, DDPM/DDIM equivalence, skipped-step formulas and counted predictor invocations. CI runs on Python 3.10-3.13 and regenerates the figure from the actual demo on 3.11.
 
 This is an educational low-dimensional generator. It is not an image model, latent diffusion system, density estimator, FID evaluation, security tool or production library. Nearest-neighbor metrics depend on sample size and are not likelihoods or distributional guarantees. This demo does not isolate causal contributions of architecture, schedule or optimizer. The terminal alpha-bar is about 0.006123, not zero: starting from a standard normal is an approximation to the finite forward marginal. No privacy guarantee, robust generalization claim or real-data evaluation is made.
+
+## Finite input does not guarantee finite arithmetic
+
+A loaded model can contain only finite parameters and still overflow inside a hidden-unit sum. For example, a one-unit network with first-layer weights `1e308,-1e308` and input coordinates `2,2` forms `infinity + -infinity`; previously `predict` and `loss_grad` returned NaNs. A positive overflow could instead be hidden by `tanh(infinity)=1`.
+
+Forward states, hidden preactivations, outputs, noise loss and every gradient coordinate now reject nonfinite derived values with `ValueError`. This is conservative: it does not evaluate the same expression in higher precision or recover a finite answer after an overflowing intermediate. No new magnitude cap, clipping or changed finite arithmetic is introduced. The ordinary complete trained sampler demo and both retained figures remain byte-for-byte unchanged.
+
+Five new tests cover loaded finite models, the separate arithmetic boundaries, large finite accepted values, exact ordinary calculations and both sampler CLI error paths with no stdout. Four deliberate guard removals are rejected. CI also runs all 38 tests from an installed wheel outside the checkout, checks six module origins before and after, reproduces the complete sampler demo and both figures, trains a smoke model and replays DDPM, DDIM and the console entry point. These checks are not a stability or sample-quality guarantee for arbitrary parameters.
 
 ## Source credit
 

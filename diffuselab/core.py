@@ -42,7 +42,7 @@ class Schedule:
         self.check_t(t)
         clean, noise = vector(clean, 2, 'clean'), vector(noise, 2, 'noise')
         a, b = math.sqrt(self.abar[t]), math.sqrt(1-self.abar[t])
-        return [a*x+b*z for x, z in zip(clean, noise)]
+        return [number(a*x+b*z, 'forward state') for x, z in zip(clean, noise)]
 
     def reverse(self, noisy, t, epsilon, noise):
         self.check_t(t)
@@ -79,8 +79,8 @@ class Network:
     def run(self, f):
         f = vector(f, 7, 'features')
         h, p = self.hidden, self.params
-        a = [math.tanh(sum(p[j*7+k]*f[k] for k in range(7))+p[7*h+j]) for j in range(h)]
-        out = [sum(p[8*h+d*h+j]*a[j] for j in range(h))+p[10*h+d] for d in range(2)]
+        a = [math.tanh(number(sum(p[j*7+k]*f[k] for k in range(7))+p[7*h+j], 'hidden preactivation')) for j in range(h)]
+        out = [number(sum(p[8*h+d*h+j]*a[j] for j in range(h))+p[10*h+d], 'network output') for d in range(2)]
         return out, a
 
     def loss_grad(self, f, target):
@@ -98,7 +98,8 @@ class Network:
             for k in range(7):
                 g[j*7+k] = dh*f[k]
             g[7*h+j] = dh
-        return sum(d*d for d in delta)/2, g
+        loss = number(sum(d*d for d in delta)/2, 'noise loss')
+        return loss, [number(value, 'loss gradient') for value in g]
 
     def predict(self, x, t, schedule):
         return self.run(features(x, t, schedule))[0]
