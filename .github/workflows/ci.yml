@@ -22,4 +22,11 @@ jobs:
       - run: python -m diffuselab sampler-demo > /tmp/diffuse-demo.json
       - run: python examples/render_demo.py /tmp/diffuse-demo.json --check
       - run: python examples/render_samplers.py /tmp/diffuse-demo.json --check
-      - run: bash examples/verify_wheel.sh /tmp/diffuse-demo.json
+  installed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python examples/check_installed.py
