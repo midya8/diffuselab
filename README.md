@@ -1,6 +1,6 @@
 # Diffusion in 2d
 
-DiffuseLab trains a small diffusion model on two-dimensional points. It implements the noise predictor, backpropagation and Gaussian reverse steps without runtime dependencies. The demo compares learned samples with untrained and Gaussian-prior controls, including a metric check that catches a deliberately collapsed generator.
+This implementation trains a small diffusion model on two-dimensional points. It implements the noise predictor, backpropagation and Gaussian reverse steps without runtime dependencies. The demo compares learned samples with untrained and Gaussian-prior controls, including a metric check that catches a deliberately collapsed generator.
 
 Train and sample with DDPM, or reuse the same model with selected-grid DDIM sampling. [DESIGN.md](DESIGN.md) defines both samplers, the training data and the saved-model format.
 
